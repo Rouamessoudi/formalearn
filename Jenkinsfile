@@ -194,6 +194,13 @@ pipeline {
       }
       steps {
         script {
+          def loadSonarToken = {
+            def st = sh(script: 'test -f /run/secrets/sonar-token', returnStatus: true)
+            if (st == 0) {
+              env.SONAR_TOKEN = sh(script: 'tr -d "\\r\\n" < /run/secrets/sonar-token', returnStdout: true).trim()
+            }
+          }
+          loadSonarToken()
           def runSonar = {
             dir('backend') {
               if (isUnix()) {
@@ -221,6 +228,10 @@ pipeline {
       }
       steps {
         script {
+          def st = sh(script: 'test -f /run/secrets/sonar-token', returnStatus: true)
+          if (st == 0 && !env.SONAR_TOKEN?.trim()) {
+            env.SONAR_TOKEN = sh(script: 'tr -d "\\r\\n" < /run/secrets/sonar-token', returnStdout: true).trim()
+          }
           def checkGate = {
             if (isUnix()) {
               sh '''

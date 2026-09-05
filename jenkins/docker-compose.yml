@@ -32,6 +32,10 @@ services:
         source: ..
         target: /workspace
         read_only: true
+      - type: bind
+        source: ../.sonar-token
+        target: /run/secrets/sonar-token
+        read_only: true
 
 volumes:
   jenkins_home:
