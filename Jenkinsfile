@@ -16,6 +16,7 @@ pipeline {
   environment {
     CI = 'true'
     SONAR_HOST_URL = 'http://host.docker.internal:9000'
+    CHROME_BIN = '/usr/bin/chromium'
   }
 
   stages {
@@ -192,14 +193,22 @@ pipeline {
         expression { return !params.SKIP_SONAR }
       }
       steps {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-          dir('backend') {
-            script {
+        script {
+          def runSonar = {
+            dir('backend') {
               if (isUnix()) {
                 sh './mvnw -B -DskipTests sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN -Dsonar.qualitygate.wait=true'
               } else {
                 bat 'mvnw.cmd -B -DskipTests sonar:sonar -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.token=%SONAR_TOKEN% -Dsonar.qualitygate.wait=true'
               }
+            }
+          }
+          if (env.SONAR_TOKEN?.trim()) {
+            echo 'SONAR_TOKEN fourni par l’environnement de l’agent Jenkins.'
+            runSonar()
+          } else {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+              runSonar()
             }
           }
         }
@@ -211,8 +220,25 @@ pipeline {
         expression { return !params.SKIP_SONAR }
       }
       steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
+        script {
+          def checkGate = {
+            if (isUnix()) {
+              sh '''
+                set -e
+                RESP=$(curl -sf -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/qualitygates/project_status?projectKey=formalearn-backend")
+                echo "$RESP" | grep -q '"status":"OK"'
+              '''
+            } else {
+              bat 'curl -sf -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?projectKey=formalearn-backend | findstr /C:"\\"status\\":\\"OK\\""'
+            }
+          }
+          if (env.SONAR_TOKEN?.trim()) {
+            checkGate()
+          } else {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+              checkGate()
+            }
+          }
         }
       }
     }

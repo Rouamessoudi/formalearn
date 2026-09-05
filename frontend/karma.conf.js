@@ -1,4 +1,5 @@
 module.exports = function (config) {
+  process.env.CHROME_BIN = process.env.CHROME_BIN || process.env.CHROMIUM_BIN || '/usr/bin/chromium';
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
