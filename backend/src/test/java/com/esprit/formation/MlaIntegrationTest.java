@@ -31,13 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class MlaIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class MlaIntegrationTest extends IntegrationSupport {
 
     @MockBean
     private MlScoringClient mlScoringClient;
@@ -50,8 +44,8 @@ class MlaIntegrationTest {
 
     @Test
     void learnerRecommendationsUseProfileAndOnlyPublishedFormations() throws Exception {
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String admin = login("admin@formalearn.tn", "Admin123!");
+        String learner = learnerToken();
+        String admin = adminToken();
 
         when(mlScoringClient.score(any())).thenAnswer(invocation -> {
             MlPredictRequest request = invocation.getArgument(0);
@@ -99,7 +93,7 @@ class MlaIntegrationTest {
 
     @Test
     void updatedProfileIsSentToMlService() throws Exception {
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
+        String learner = learnerToken();
         mockMvc.perform(put("/api/profil")
                         .header("Authorization", "Bearer " + learner)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,14 +123,5 @@ class MlaIntegrationTest {
                                     """))
                     .andExpect(status().isOk());
         }
-    }
-
-    private String login(String email, String password) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
-                .andExpect(status().isOk())
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsByteArray()).get("token").asText();
     }
 }

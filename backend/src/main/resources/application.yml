@@ -32,10 +32,12 @@ app:
     read-timeout-ms: 5000
     top-n: 5
   demo:
-    admin-email: admin@formalearn.tn
-    admin-password: Admin123!
-    learner-email: apprenant@formalearn.tn
-    learner-password: Learner123!
+    admin-email: ${DEMO_ADMIN_EMAIL:admin@formalearn.tn}
+    admin-password: ${DEMO_ADMIN_PASSWORD:}
+    learner-email: ${DEMO_LEARNER_EMAIL:apprenant@formalearn.tn}
+    learner-password: ${DEMO_LEARNER_PASSWORD:}
+    learner2-email: ${DEMO_LEARNER2_EMAIL:apprenant2@formalearn.tn}
+    learner3-email: ${DEMO_LEARNER3_EMAIL:apprenant3@formalearn.tn}
 
 ---
 spring:

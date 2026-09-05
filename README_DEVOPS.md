@@ -2,6 +2,8 @@
 
 Dépôt GitHub central : https://github.com/Rouamessoudi/formalearn
 
+Les mots de passe démo ont existé en clair dans le commit initial (`bc0b1df`). Ils ne sont plus dans `HEAD`. Sans `git push --force`, l’historique GitHub public les conserve : **changez** `DEMO_*_PASSWORD` et `JWT_SECRET` dans le `.env` local (et Jenkins) par rapport aux anciennes valeurs. Ne jamais réécrire `main` avec un force-push.
+
 ## 1. Architecture
 
 ```
@@ -46,6 +48,8 @@ Credentials Jenkins (Secret text / username-password, jamais dans Git) :
 | ID | Usage |
 |---|---|
 | `sonar-token` | Token utilisateur SonarQube |
+| `formalearn-demo-admin` | Mot de passe admin démo (`DEMO_ADMIN_PASSWORD`) pour `mvn test` |
+| `formalearn-demo-learner` | Mot de passe apprenant démo (`DEMO_LEARNER_PASSWORD`) |
 | `docker-registry` | Login registry si `PUSH_IMAGES` |
 
 Variable globale : `SONAR_HOST_URL` = `http://host.docker.internal:9000` (Sonar Compose) ou URL réelle.

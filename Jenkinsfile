@@ -68,12 +68,17 @@ pipeline {
 
     stage('Backend Tests') {
       steps {
-        dir('backend') {
-          script {
-            if (isUnix()) {
-              sh './mvnw -B test'
-            } else {
-              bat 'mvnw.cmd -B test'
+        withCredentials([
+          string(credentialsId: 'formalearn-demo-admin', variable: 'DEMO_ADMIN_PASSWORD'),
+          string(credentialsId: 'formalearn-demo-learner', variable: 'DEMO_LEARNER_PASSWORD')
+        ]) {
+          dir('backend') {
+            script {
+              if (isUnix()) {
+                sh './mvnw -B test'
+              } else {
+                bat 'mvnw.cmd -B test'
+              }
             }
           }
         }

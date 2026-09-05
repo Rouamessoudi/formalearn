@@ -23,17 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class CatalogueIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class CatalogueIntegrationTest extends IntegrationSupport {
 
     @Test
     void adminCanCreateCategory() throws Exception {
-        String token = login("admin@formalearn.tn", "Admin123!");
+        String token = adminToken();
         mockMvc.perform(post("/api/categories")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -44,7 +38,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void learnerCannotCreateCategory() throws Exception {
-        String token = login("apprenant@formalearn.tn", "Learner123!");
+        String token = learnerToken();
         mockMvc.perform(post("/api/categories")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +48,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void adminCanCreateFormation() throws Exception {
-        String token = login("admin@formalearn.tn", "Admin123!");
+        String token = adminToken();
         long categoryId = firstCategoryId(token);
         mockMvc.perform(post("/api/formations")
                         .header("Authorization", "Bearer " + token)
@@ -70,7 +64,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void searchFormationsByQuery() throws Exception {
-        String token = login("apprenant@formalearn.tn", "Learner123!");
+        String token = learnerToken();
         mockMvc.perform(get("/api/formations").param("q", "Spring")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -79,8 +73,8 @@ class CatalogueIntegrationTest {
 
     @Test
     void learnerDoesNotSeeDraftFormations() throws Exception {
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String admin = login("admin@formalearn.tn", "Admin123!");
+        String learner = learnerToken();
+        String admin = adminToken();
         mockMvc.perform(get("/api/formations").header("Authorization", "Bearer " + learner))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.status=='DRAFT')]", hasSize(0)));
@@ -91,7 +85,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void chaptersAreReturnedInPositionOrder() throws Exception {
-        String token = login("apprenant@formalearn.tn", "Learner123!");
+        String token = learnerToken();
         MvcResult listed = mockMvc.perform(get("/api/formations").param("q", "Angular")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -106,7 +100,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void unknownFormationReturns404() throws Exception {
-        String token = login("apprenant@formalearn.tn", "Learner123!");
+        String token = learnerToken();
         mockMvc.perform(get("/api/formations/{id}", 9_999_999L)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
@@ -114,8 +108,8 @@ class CatalogueIntegrationTest {
 
     @Test
     void adminCanCreateChapterButLearnerCannot() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
         MvcResult listed = mockMvc.perform(get("/api/formations").param("q", "TypeScript de zéro")
                         .header("Authorization", "Bearer " + admin))
                 .andExpect(status().isOk())
@@ -138,7 +132,7 @@ class CatalogueIntegrationTest {
 
     @Test
     void adminCanReorderChapters() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
+        String admin = adminToken();
         MvcResult listed = mockMvc.perform(get("/api/formations").param("q", "TypeScript de zéro")
                         .header("Authorization", "Bearer " + admin))
                 .andExpect(status().isOk())
@@ -163,14 +157,5 @@ class CatalogueIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsByteArray()).get(0).get("id").asLong();
-    }
-
-    private String login(String email, String password) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
-                .andExpect(status().isOk())
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsByteArray()).get("token").asText();
     }
 }

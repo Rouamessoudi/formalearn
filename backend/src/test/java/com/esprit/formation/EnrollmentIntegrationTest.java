@@ -26,13 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class EnrollmentIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class EnrollmentIntegrationTest extends IntegrationSupport {
 
     @Test
     void unauthenticatedEnrollmentReturns401() throws Exception {
@@ -44,8 +38,8 @@ class EnrollmentIntegrationTest {
 
     @Test
     void learnerCanEnrollAndDuplicateIsRejected() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
         long sessionId = createOpenSession(admin, 8);
 
         mockMvc.perform(post("/api/inscriptions")
@@ -70,9 +64,9 @@ class EnrollmentIntegrationTest {
 
     @Test
     void fullSessionIsRejected() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String other = login("apprenant2@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
+        String other = learner2Token();
         long sessionId = createOpenSession(admin, 1);
 
         mockMvc.perform(post("/api/inscriptions")
@@ -90,8 +84,8 @@ class EnrollmentIntegrationTest {
 
     @Test
     void closedSessionIsRejected() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
         long formationId = publishedFormationId(admin);
         LocalDate start = LocalDate.now(ZoneOffset.UTC).plusDays(20);
         long sessionId = createSession(admin, formationId, start, start.plusDays(5), 10, "CLOSED");
@@ -105,9 +99,9 @@ class EnrollmentIntegrationTest {
 
     @Test
     void learnerSeesOnlyOwnEnrollmentsWhileAdminSeesSessionList() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String other = login("apprenant2@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
+        String other = learner2Token();
         long sessionId = createOpenSession(admin, 10);
 
         mockMvc.perform(post("/api/inscriptions")
@@ -136,9 +130,9 @@ class EnrollmentIntegrationTest {
 
     @Test
     void cancellationFreesASeat() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String other = login("apprenant2@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
+        String other = learner2Token();
         long sessionId = createOpenSession(admin, 1);
 
         MvcResult created = mockMvc.perform(post("/api/inscriptions")
@@ -172,9 +166,9 @@ class EnrollmentIntegrationTest {
 
     @Test
     void learnerCanCancelOwnEnrollmentAndFreeSeat() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
-        String learner = login("apprenant@formalearn.tn", "Learner123!");
-        String other = login("apprenant2@formalearn.tn", "Learner123!");
+        String admin = adminToken();
+        String learner = learnerToken();
+        String other = learner2Token();
         long sessionId = createOpenSession(admin, 1);
 
         MvcResult created = mockMvc.perform(post("/api/inscriptions")
@@ -198,7 +192,7 @@ class EnrollmentIntegrationTest {
 
     @Test
     void adminCanUpdateAndDeleteSessionWithoutEnrollments() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
+        String admin = adminToken();
         long formationId = publishedFormationId(admin);
         LocalDate start = LocalDate.now(ZoneOffset.UTC).plusDays(40);
         long sessionId = createSession(admin, formationId, start, start.plusDays(5), 10, "OPEN");
@@ -223,7 +217,7 @@ class EnrollmentIntegrationTest {
 
     @Test
     void invalidSessionDatesReturn400() throws Exception {
-        String admin = login("admin@formalearn.tn", "Admin123!");
+        String admin = adminToken();
         long formationId = publishedFormationId(admin);
         LocalDate start = LocalDate.now(ZoneOffset.UTC).plusDays(50);
         mockMvc.perform(post("/api/sessions")
@@ -271,14 +265,5 @@ class EnrollmentIntegrationTest {
             }
         }
         throw new IllegalStateException("Aucune formation Spring publiée");
-    }
-
-    private String login(String email, String password) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
-                .andExpect(status().isOk())
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsByteArray()).get("token").asText();
     }
 }

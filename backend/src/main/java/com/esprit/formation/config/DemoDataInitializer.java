@@ -53,6 +53,8 @@ public class DemoDataInitializer implements ApplicationRunner {
     private final TrainingSessionRepository sessionRepository;
     private final EnrollmentRepository enrollmentRepository;
 
+    private final DemoProperties demoProperties;
+
     public DemoDataInitializer(
             RoleRepository roleRepository,
             UserRepository userRepository,
@@ -61,7 +63,8 @@ public class DemoDataInitializer implements ApplicationRunner {
             FormationRepository formationRepository,
             ChapterRepository chapterRepository,
             TrainingSessionRepository sessionRepository,
-            EnrollmentRepository enrollmentRepository
+            EnrollmentRepository enrollmentRepository,
+            DemoProperties demoProperties
     ) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -71,19 +74,22 @@ public class DemoDataInitializer implements ApplicationRunner {
         this.chapterRepository = chapterRepository;
         this.sessionRepository = sessionRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.demoProperties = demoProperties;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        demoProperties.requirePasswords();
         Role adminRole = ensureRole(RoleName.ADMIN);
         Role learnerRole = ensureRole(RoleName.APPRENANT);
-        upsertUser(ADMIN_EMAIL, "Admin123!", "Roua Admin", adminRole, false, null);
-        upsertUser(LEARNER_EMAIL, "Learner123!", "Roua Messaoudi", learnerRole, true,
+        String learnerPassword = demoProperties.getLearnerPassword();
+        upsertUser(demoProperties.getAdminEmail(), demoProperties.getAdminPassword(), "Roua Admin", adminRole, false, null);
+        upsertUser(demoProperties.getLearnerEmail(), learnerPassword, "Roua Messaoudi", learnerRole, true,
                 new DemoProfile(InterestArea.BACKEND, 3, EducationLevel.INGENIEUR, "JAVA,SPRING,SQL"));
-        upsertUser(LEARNER2_EMAIL, "Learner123!", "Sami Trabelsi", learnerRole, true,
+        upsertUser(demoProperties.getLearner2Email(), learnerPassword, "Sami Trabelsi", learnerRole, true,
                 new DemoProfile(InterestArea.DATA, 2, EducationLevel.MASTER, "PYTHON,SQL"));
-        upsertUser(LEARNER3_EMAIL, "Learner123!", "Ines Gharbi", learnerRole, true,
+        upsertUser(demoProperties.getLearner3Email(), learnerPassword, "Ines Gharbi", learnerRole, true,
                 new DemoProfile(InterestArea.BACKEND, 1, EducationLevel.LICENCE, "JAVA,SQL"));
         retireLegacyDemoCatalogue();
         seedCatalogue();
@@ -310,7 +316,7 @@ public class DemoDataInitializer implements ApplicationRunner {
                 "Autorisations",
                 "ADMIN crée les catégories. APPRENANT s’inscrit. Testé : 403 sur /api/admin/ping.",
                 "Mots de passe",
-                "BCrypt. Comptes seed ré-encodés au démarrage avec Admin123! / Learner123!.",
+                "BCrypt. Comptes seed ré-encodés au démarrage avec DEMO_ADMIN_PASSWORD / DEMO_LEARNER_PASSWORD.",
                 "Attaques courantes",
                 "Paramètres typés, pas de concat SQL. @Valid sur les body. Positions de chapitres uniques.",
                 "Headers",

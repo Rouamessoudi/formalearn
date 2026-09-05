@@ -47,6 +47,12 @@ services:
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
       JWT_SECRET: ${JWT_SECRET:-change_me_use_at_least_32_random_characters}
       ML_BASE_URL: http://ml:8000
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@formalearn.tn}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD}
+      DEMO_LEARNER_EMAIL: ${DEMO_LEARNER_EMAIL:-apprenant@formalearn.tn}
+      DEMO_LEARNER_PASSWORD: ${DEMO_LEARNER_PASSWORD}
+      DEMO_LEARNER2_EMAIL: ${DEMO_LEARNER2_EMAIL:-apprenant2@formalearn.tn}
+      DEMO_LEARNER3_EMAIL: ${DEMO_LEARNER3_EMAIL:-apprenant3@formalearn.tn}
     ports:
       - "${BACKEND_HOST_PORT:-8080}:8080"
     depends_on:

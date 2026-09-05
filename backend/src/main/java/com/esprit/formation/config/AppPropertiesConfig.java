@@ -5,6 +5,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, MlProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, MlProperties.class, DemoProperties.class})
 public class AppPropertiesConfig {
 }

@@ -166,11 +166,13 @@ Pipeline locale : `powershell -File scripts\run-ci.ps1`
 
 ## 14. Comptes de démonstration
 
-| Rôle | Email | Mot de passe |
+Les **mots de passe ne sont pas dans Git**. Copiez `.env.example` vers `.env` et renseignez `DEMO_ADMIN_PASSWORD` et `DEMO_LEARNER_PASSWORD`.
+
+| Rôle | Email (défaut) | Variable mot de passe |
 |---|---|---|
-| ADMIN | `admin@formalearn.tn` | `Admin123!` |
-| APPRENANT | `apprenant@formalearn.tn` | `Learner123!` |
-| APPRENANT | `apprenant2@formalearn.tn` | `Learner123!` |
+| ADMIN | `admin@formalearn.tn` | `DEMO_ADMIN_PASSWORD` |
+| APPRENANT | `apprenant@formalearn.tn` | `DEMO_LEARNER_PASSWORD` |
+| APPRENANT | `apprenant2@formalearn.tn` | même `DEMO_LEARNER_PASSWORD` |
 
 Données seed : 4 catégories, 12 formations (dont DRAFT), chapitres, 6 sessions, inscriptions de démo (Spring + Python).
 
