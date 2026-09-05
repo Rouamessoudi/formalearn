@@ -1,0 +1,25 @@
+<section class="wrap">
+  <div class="panel">
+    <p class="kicker">FormaLearn</p>
+    <h1>Connexion à la plateforme</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        Email
+        <input type="email" formControlName="email" autocomplete="username" placeholder="admin@formalearn.tn">
+      </label>
+      <label>
+        Mot de passe
+        <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••">
+      </label>
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      <button class="fl-btn fl-btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    </form>
+  </div>
+</section>

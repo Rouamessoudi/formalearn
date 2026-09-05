@@ -1,0 +1,29 @@
+<aside class="sidebar">
+  <div class="brand">
+    <span class="mark">FL</span>
+    <div>
+      <strong>FormaLearn</strong>
+      <small>Espace administrateur</small>
+    </div>
+  </div>
+  <nav>
+    <a routerLink="/admin/dashboard" routerLinkActive="active">Tableau de bord</a>
+    <a routerLink="/admin/categories" routerLinkActive="active">Catégories</a>
+    <a routerLink="/admin/formations" routerLinkActive="active">Formations</a>
+    <a routerLink="/admin/sessions" routerLinkActive="active">Sessions</a>
+    <a routerLink="/admin/inscriptions" routerLinkActive="active">Participants</a>
+  </nav>
+  <button class="logout" type="button" (click)="auth.logout()">Déconnexion</button>
+</aside>
+<div class="shell">
+  <header class="topbar">
+    <div>
+      <p class="kicker">Plateforme de formations</p>
+      <h2>Pilotage de l'offre et des sessions</h2>
+    </div>
+    <span class="fl-badge">{{ auth.currentUser()?.fullName }} · ADMIN</span>
+  </header>
+  <main>
+    <router-outlet />
+  </main>
+</div>

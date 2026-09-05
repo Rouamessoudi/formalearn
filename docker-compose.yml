@@ -1,0 +1,83 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: formalearn-mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-formation_platform}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-change_me}"]
+      interval: 8s
+      timeout: 5s
+      retries: 15
+    networks:
+      - formalearn
+
+  ml:
+    build:
+      context: ./ml
+    image: formalearn-ml:local
+    container_name: formalearn-ml
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - formalearn
+
+  backend:
+    build:
+      context: ./backend
+    image: formalearn-backend:local
+    container_name: formalearn-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-formation_platform}
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+      JWT_SECRET: ${JWT_SECRET:-change_me_use_at_least_32_random_characters}
+      ML_BASE_URL: http://ml:8000
+    ports:
+      - "${BACKEND_HOST_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ml:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/api/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 12
+    networks:
+      - formalearn
+
+  frontend:
+    build:
+      context: ./frontend
+    image: formalearn-frontend:local
+    container_name: formalearn-frontend
+    ports:
+      - "8088:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - formalearn
+
+volumes:
+  mysql_data:
+
+networks:
+  formalearn:
+    driver: bridge

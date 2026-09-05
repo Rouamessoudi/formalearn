@@ -1,0 +1,41 @@
+<section class="fl-page">
+  <div class="fl-hero">
+    <h1>🎯 Mes recommandations</h1>
+    <button class="fl-btn fl-btn-ghost" type="button" (click)="refresh()" style="margin-top:1rem">Actualiser mes recommandations</button>
+  </div>
+
+  @if (loading) {
+    <div class="fl-grid">
+      <article class="course-card"><div class="skeleton"></div></article>
+      <article class="course-card"><div class="skeleton"></div></article>
+    </div>
+  } @else if (error) {
+    <article class="fl-card empty">
+      <h2>❌ Recommandations indisponibles</h2>
+      <p>{{ error }}</p>
+      <button class="fl-btn fl-btn-primary" type="button" (click)="refresh()">Réessayer</button>
+    </article>
+  } @else if (items.length === 0) {
+    <article class="fl-card empty">
+      <h2>Aucune recommandation</h2>
+      <p>Complétez votre profil ou attendez la publication de formations.</p>
+      <a class="fl-btn fl-btn-primary" routerLink="/app/profil">Modifier mon profil</a>
+    </article>
+  } @else {
+    <div class="fl-grid">
+      @for (item of items; track item.id) {
+        <article class="course-card">
+          <div class="top">
+            <span class="fl-badge">{{ item.category.name }}</span>
+            <span class="score">Pertinence : {{ percent(item.score) }}%</span>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.durationHours }} h · {{ item.price | priceDt }}</p>
+          <div class="score-bar"><span [style.width.%]="percent(item.score)"></span></div>
+          <p class="why">{{ why(item) }}</p>
+          <a class="fl-btn fl-btn-primary" [routerLink]="['/app/catalogue', item.id]">Voir la formation</a>
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,67 @@
+<section class="fl-page">
+  <div class="fl-toolbar">
+    <div>
+      <h1>Sessions de formation</h1>
+    </div>
+    <button class="fl-btn fl-btn-primary" type="button" (click)="openCreate()">Nouvelle session</button>
+  </div>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (sessions.length === 0) {
+    <article class="fl-card empty">Aucune session. Créez-en une pour ouvrir les inscriptions.</article>
+  } @else {
+    <div class="fl-grid">
+      @for (item of sessions; track item.id) {
+        <article class="fl-card">
+          <div class="fl-actions">
+            <span class="fl-badge" [class.open]="item.status === 'OPEN'" [class.closed]="item.status === 'CLOSED'">{{ item.status }}</span>
+            <span class="fl-badge" [class]="fillKind(item)">{{ fillLabel(item) }}</span>
+          </div>
+          <h3>{{ item.formationTitle }}</h3>
+          <p>{{ formatDate(item.startDate) }} → {{ formatDate(item.endDate) }}</p>
+          <p>Capacité : {{ item.capacity }} · Inscrits : {{ item.enrolledCount }} · Places restantes : {{ item.remainingPlaces }}</p>
+          <div class="fl-progress" [class]="fillKind(item)"><span [style.width.%]="percent(item)"></span></div>
+          <p class="muted">{{ item.enrolledCount }} / {{ item.capacity }} places occupées</p>
+          <div class="fl-actions">
+            <a class="link" [routerLink]="['/admin/sessions', item.id, 'inscriptions']">Participants</a>
+            <button class="link" type="button" (click)="openEdit(item)">Modifier</button>
+            <button class="link danger" type="button" (click)="remove(item)">Supprimer</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (modalOpen) {
+  <div class="overlay" (click)="modalOpen = false">
+    <form class="modal" [formGroup]="form" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+      <h2>{{ editing ? 'Modifier' : 'Nouvelle' }} session</h2>
+      <label>Formation
+        <select formControlName="formationId">
+          @for (formation of formations; track formation.id) {
+            <option [value]="formation.id">{{ formation.title }} ({{ formation.status }})</option>
+          }
+        </select>
+      </label>
+      <div class="row">
+        <label>Date de début<input type="date" formControlName="startDate"></label>
+        <label>Date de fin<input type="date" formControlName="endDate"></label>
+      </div>
+      <div class="row">
+        <label>Capacité<input type="number" min="1" formControlName="capacity"></label>
+        <label>Statut
+          <select formControlName="status">
+            <option value="OPEN">OPEN</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost" type="button" (click)="modalOpen = false">Annuler</button>
+        <button class="fl-btn fl-btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+}

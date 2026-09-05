@@ -1,0 +1,43 @@
+<section class="fl-page">
+  <div class="fl-hero">
+    <h1>Mes inscriptions</h1>
+  </div>
+
+  <div class="fl-actions" style="margin:1rem 0">
+    <button class="ghost" type="button" (click)="setFilter('ALL')">Toutes</button>
+    <button class="ghost" type="button" (click)="setFilter('CONFIRMED')">Confirmées</button>
+    <button class="ghost" type="button" (click)="setFilter('PENDING')">En attente</button>
+    <button class="ghost" type="button" (click)="setFilter('CANCELLED')">Annulées</button>
+  </div>
+
+  @if (loading) {
+    <article class="fl-card"><div class="skeleton"></div></article>
+  } @else if (displayed.length === 0) {
+    <article class="fl-card empty">
+      <h2>Aucune inscription</h2>
+      <p>Parcourez le catalogue et inscrivez-vous à une session ouverte.</p>
+    </article>
+  } @else {
+    <div class="cards">
+      @for (item of displayed; track item.id) {
+        <article class="fl-card item">
+          <div class="top">
+            <span class="fl-badge">{{ item.categoryName }}</span>
+            <span class="fl-badge" [class]="item.status.toLowerCase()">{{ item.status }}</span>
+          </div>
+          <h2>{{ item.formationTitle }}</h2>
+          <p class="meta">Session {{ formatDate(item.startDate) }} → {{ formatDate(item.endDate) }}</p>
+          <p class="muted">Inscription le {{ item.createdAt | date:'dd/MM/yyyy' }}</p>
+          @if (item.remainingPlaces != null && item.capacity != null) {
+            <p>Places restantes : {{ item.remainingPlaces }} / {{ item.capacity }}</p>
+          }
+          @if (canCancel(item)) {
+            <button class="fl-btn" type="button" [disabled]="cancellingId === item.id" (click)="cancel(item)">
+              Annuler mon inscription
+            </button>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

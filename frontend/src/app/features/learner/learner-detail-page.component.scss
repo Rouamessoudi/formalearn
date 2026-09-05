@@ -1,0 +1,10 @@
+.back { color: #fff; font-weight: 700; display: inline-block; margin-bottom: 1rem; background: var(--fl-navy); padding: .4rem .8rem; border-radius: 999px; }
+.muted, .empty { color: var(--fl-muted); }
+.body, .program { margin-top: 1rem; }
+.program { list-style: none; padding: 0; display: grid; gap: .7rem; }
+.program p { color: var(--fl-muted); margin: .4rem 0 0; white-space: pre-wrap; line-height: 1.45; }
+.sessions { display: grid; gap: .8rem; margin-top: .8rem; }
+.session-top { display: flex; justify-content: space-between; gap: .8rem; align-items: center; }
+.session p { color: var(--fl-muted); }
+.session .fl-btn { margin-top: .6rem; }
+.fl-badge.closed { background: #fee2e2; color: #991b1b; }

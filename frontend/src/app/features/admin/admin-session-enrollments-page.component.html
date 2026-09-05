@@ -1,0 +1,55 @@
+<section class="fl-page">
+  <a class="back" routerLink="/admin/sessions">← Sessions</a>
+
+  @if (session) {
+    <div class="fl-hero">
+      <span class="fl-badge" [class.open]="session.status === 'OPEN'" [class.closed]="session.status === 'CLOSED'">{{ session.status }}</span>
+      <h1>Participants — {{ session.formationTitle }}</h1>
+      <p>{{ formatDate(session.startDate) }} → {{ formatDate(session.endDate) }}</p>
+      <p>{{ session.enrolledCount }} / {{ session.capacity }} inscrits · {{ session.remainingPlaces }} places restantes</p>
+      <div class="fl-progress" [class]="fillKind(session)"><span [style.width.%]="percent(session)"></span></div>
+    </div>
+  }
+
+  <label>Recherche participant
+    <input [(ngModel)]="q" name="q" (ngModelChange)="apply()" placeholder="Nom ou email">
+  </label>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (displayed.length === 0) {
+    <article class="fl-card empty">Aucun inscrit pour cette session.</article>
+  } @else {
+    <div class="fl-table-wrap fl-card" style="margin-top:1rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Statut</th>
+            <th>Date d'inscription</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of displayed; track item.id) {
+            <tr>
+              <td><strong>{{ item.learnerName }}</strong></td>
+              <td>{{ item.learnerEmail }}</td>
+              <td><span class="fl-badge" [class]="item.status.toLowerCase()">{{ item.status }}</span></td>
+              <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="fl-actions">
+                @if (item.status === 'PENDING') {
+                  <button class="link" type="button" (click)="confirm(item)">Confirmer</button>
+                }
+                @if (item.status === 'PENDING' || item.status === 'CONFIRMED') {
+                  <button class="link danger" type="button" (click)="cancel(item)">Annuler</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

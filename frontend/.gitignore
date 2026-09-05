@@ -1,0 +1,8 @@
+node_modules/
+.angular/
+dist/
+.idea/
+*.log
+.env
+.env.local
+npm-debug.log*

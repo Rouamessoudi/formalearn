@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: formation-platform
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change_me_use_at_least_32_random_characters}
+    expiration-ms: ${JWT_EXPIRATION_MS:28800000}
+  ml:
+    base-url: ${ML_BASE_URL:http://localhost:8000}
+    connect-timeout-ms: 2000
+    read-timeout-ms: 5000
+    top-n: 5
+  demo:
+    admin-email: admin@formalearn.tn
+    admin-password: Admin123!
+    learner-email: apprenant@formalearn.tn
+    learner-password: Learner123!
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:formation_platform}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=UTC
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    com.esprit.formation: info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:formation_platform}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=UTC
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change_me_use_at_least_32_random_characters}
+    expiration-ms: 28800000
+  ml:
+    base-url: ${ML_BASE_URL:http://localhost:8000}
+    connect-timeout-ms: 500
+    read-timeout-ms: 1000
+    top-n: 5

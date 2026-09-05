@@ -1,0 +1,47 @@
+<section class="fl-page">
+  <div class="fl-hero">
+    <h1>Mon profil</h1>
+      <a class="fl-btn fl-btn-ghost" routerLink="/app/recommandations" style="margin-top:1rem">Recalculer les recommandations</a>
+  </div>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else {
+    <form class="fl-card form" [formGroup]="form" (ngSubmit)="save()">
+      <label>Centre d'intérêt
+        <select formControlName="interest">
+          <option value="BACKEND">BACKEND</option>
+          <option value="DATA">DATA</option>
+          <option value="MANAGEMENT">MANAGEMENT</option>
+          <option value="LANGUAGES">LANGUAGES</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+      </label>
+      <div class="row">
+        <label>Années d'expérience
+          <input type="number" min="0" max="40" formControlName="experienceYears">
+        </label>
+        <label>Niveau
+          <select formControlName="educationLevel">
+            <option value="LICENCE">LICENCE</option>
+            <option value="INGENIEUR">INGENIEUR</option>
+            <option value="MASTER">MASTER</option>
+          </select>
+        </label>
+      </div>
+      <fieldset>
+        <legend>Compétences</legend>
+        <div class="skills">
+          @for (skill of skills; track skill) {
+            <label class="chip">
+              <input type="checkbox" [formControlName]="skill">
+              {{ skill }}
+            </label>
+          }
+        </div>
+      </fieldset>
+      <button class="fl-btn fl-btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+      <a class="fl-btn" routerLink="/app/recommandations">Recalculer les recommandations</a>
+    </form>
+  }
+</section>

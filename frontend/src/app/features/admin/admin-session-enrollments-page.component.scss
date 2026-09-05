@@ -1,0 +1,13 @@
+.back { display: inline-block; margin-bottom: 1rem; font-weight: 700; color: var(--fl-navy); }
+.muted, .empty { color: var(--fl-muted); }
+.empty { text-align: center; margin-top: 1rem; }
+.table-wrap { margin-top: 1.2rem; background: #fff; border: 1px solid var(--fl-border); border-radius: 14px; overflow: auto; box-shadow: var(--fl-shadow); }
+table { width: 100%; border-collapse: collapse; min-width: 860px; }
+th, td { padding: .9rem 1rem; text-align: left; border-bottom: 1px solid var(--fl-border); }
+th { font-size: .78rem; text-transform: uppercase; color: var(--fl-muted); }
+.actions { display: flex; gap: .6rem; }
+.link { background: none; border: 0; color: var(--fl-navy); font-weight: 700; cursor: pointer; }
+.link.danger { color: var(--fl-danger); }
+.fl-badge.closed, .fl-badge.cancelled { background: #fee2e2; color: #991b1b; }
+.fl-badge.pending { background: #fef3c7; color: #92400e; }
+.fl-badge.confirmed { background: #d1fae5; color: #065f46; }

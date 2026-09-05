@@ -1,0 +1,10 @@
+.filters { display: grid; grid-template-columns: 1.4fr 1fr .7fr .7fr auto auto; gap: .7rem; margin: 1.2rem 0; align-items: center; }
+input, select { border: 1px solid var(--fl-border); border-radius: 10px; padding: .7rem; font: inherit; }
+.ghost { border: 0; background: #e2e8f0; border-radius: 10px; padding: .7rem 1rem; cursor: pointer; font-weight: 600; }
+.muted, .empty { color: var(--fl-muted); text-align: center; }
+.course-card { background: #fff; border: 1px solid var(--fl-border); border-radius: 16px; padding: 1.2rem; box-shadow: var(--fl-shadow); display: grid; gap: .6rem; }
+.course-card p { color: var(--fl-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 4.2em; }
+.meta { display: flex; justify-content: space-between; font-weight: 700; color: var(--fl-navy); }
+.course-card .fl-btn { justify-self: start; }
+@media (max-width: 900px) { .filters { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .filters { grid-template-columns: 1fr; } }

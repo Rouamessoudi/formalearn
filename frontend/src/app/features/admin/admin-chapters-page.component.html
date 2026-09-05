@@ -1,0 +1,57 @@
+<section class="fl-page">
+  <a class="back" routerLink="/admin/formations">← Formations</a>
+  <div class="toolbar">
+    <div>
+      <h1>{{ formation?.title || 'Formation' }}</h1>
+      @if (formation) {
+        <p>
+          <span class="fl-badge" [class.published]="formation.status === 'PUBLISHED'" [class.draft]="formation.status === 'DRAFT'">{{ formation.status }}</span>
+          · {{ formation.category.name }} · {{ formation.durationHours }} h · {{ chapters.length }} chapitres
+        </p>
+      }
+    </div>
+    <button class="fl-btn fl-btn-primary" type="button" (click)="openCreate()">Nouveau chapitre</button>
+  </div>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (chapters.length === 0) {
+    <article class="fl-card empty">Aucun chapitre. Ajoutez le programme pédagogique.</article>
+  } @else {
+    <div class="list">
+      @for (chapter of chapters; track chapter.id) {
+        <article class="fl-card">
+          <div class="row">
+            <span class="pos">{{ chapter.position }}</span>
+            <div>
+              <h3>{{ chapter.title }}</h3>
+              <p class="body">{{ chapter.content }}</p>
+            </div>
+            <div class="actions">
+              <button class="link" type="button" [disabled]="$index === 0" (click)="move(chapter, 'up')">↑ Monter</button>
+              <button class="link" type="button" [disabled]="$index === chapters.length - 1" (click)="move(chapter, 'down')">↓ Descendre</button>
+              <button class="link" type="button" (click)="openEdit(chapter)">Modifier</button>
+              <button class="link danger" type="button" (click)="remove(chapter)">Supprimer</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (modalOpen) {
+  <div class="overlay" (click)="modalOpen = false">
+    <form class="modal" [formGroup]="form" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+      <h2>{{ editing ? 'Modifier' : 'Nouveau' }} chapitre</h2>
+      <p class="hint">Programme pédagogique (ordre = position). Rédige un vrai contenu, pas une ligne.</p>
+      <label>Titre<input formControlName="title"></label>
+      <label>Contenu<textarea formControlName="content" rows="8"></textarea></label>
+      <label>Position<input type="number" formControlName="position"></label>
+      <div class="modal-actions">
+        <button class="ghost" type="button" (click)="modalOpen = false">Annuler</button>
+        <button class="fl-btn fl-btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+}

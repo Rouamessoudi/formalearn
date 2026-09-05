@@ -1,0 +1,103 @@
+<section class="fl-page">
+  <div class="fl-toolbar">
+    <div>
+      <h1>Formations</h1>
+    </div>
+    <button class="fl-btn fl-btn-primary" type="button" (click)="openCreate()">Nouvelle formation</button>
+  </div>
+
+  <form class="fl-filters fl-card" (ngSubmit)="$event.preventDefault(); apply()">
+    <label>Recherche
+      <input [(ngModel)]="q" name="q" (ngModelChange)="apply()" placeholder="Titre ou description">
+    </label>
+    <label>Statut
+      <select [(ngModel)]="status" name="status" (ngModelChange)="apply()">
+        <option value="">Tous</option>
+        <option value="PUBLISHED">PUBLISHED</option>
+        <option value="DRAFT">DRAFT</option>
+      </select>
+    </label>
+    <label>Tri
+      <select [(ngModel)]="sort" name="sort" (ngModelChange)="apply()">
+        <option value="date">Date</option>
+        <option value="title">Titre</option>
+        <option value="price">Prix</option>
+      </select>
+    </label>
+  </form>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (displayed.length === 0) {
+    <article class="fl-card empty">Aucune formation ne correspond.</article>
+  } @else {
+    <p class="muted">{{ displayed.length }} formation(s)</p>
+    <div class="fl-table-wrap fl-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Titre</th><th>Catégorie</th><th>Prix</th><th>Durée</th><th>Chapitres</th><th>Statut</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paged(); track item.id) {
+            <tr>
+              <td><strong>{{ item.title }}</strong></td>
+              <td>{{ item.category.name }}</td>
+              <td>{{ item.price }} DT</td>
+              <td>{{ item.durationHours }} h</td>
+              <td>{{ item.chapterCount ?? '—' }}</td>
+              <td>
+                <span class="fl-badge" [class.published]="item.status === 'PUBLISHED'" [class.draft]="item.status === 'DRAFT'">{{ item.status }}</span>
+              </td>
+              <td class="fl-actions">
+                <button class="link" type="button" (click)="openEdit(item)">Modifier</button>
+                <a class="link" [routerLink]="['/admin/formations', item.id, 'chapitres']">Chapitres</a>
+                <button class="link" type="button" (click)="togglePublish(item)">
+                  {{ item.status === 'PUBLISHED' ? 'Dépublier' : 'Publier' }}
+                </button>
+                <button class="link danger" type="button" (click)="remove(item)">Supprimer</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="fl-actions" style="margin-top:1rem">
+      <button class="ghost" type="button" [disabled]="page <= 1" (click)="page = page - 1">Précédent</button>
+      <span class="muted">Page {{ page }} / {{ pageCount() }}</span>
+      <button class="ghost" type="button" [disabled]="page >= pageCount()" (click)="page = page + 1">Suivant</button>
+    </div>
+  }
+</section>
+
+@if (modalOpen) {
+  <div class="overlay" (click)="modalOpen = false">
+    <form class="modal" [formGroup]="form" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+      <h2>{{ editing ? 'Modifier' : 'Nouvelle' }} formation</h2>
+      <label>Titre<input formControlName="title"></label>
+      <label>Description<textarea formControlName="description" rows="4"></textarea></label>
+      <div class="row">
+        <label>Prix (DT)<input type="number" formControlName="price"></label>
+        <label>Durée (h)<input type="number" formControlName="durationHours"></label>
+      </div>
+      <label>Catégorie
+        <select formControlName="categoryId">
+          @for (category of categories; track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+      <label>Statut
+        <select formControlName="status">
+          <option value="DRAFT">DRAFT</option>
+          <option value="PUBLISHED">PUBLISHED</option>
+        </select>
+      </label>
+      <div class="modal-actions">
+        <button class="ghost" type="button" (click)="modalOpen = false">Annuler</button>
+        <button class="fl-btn fl-btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+}

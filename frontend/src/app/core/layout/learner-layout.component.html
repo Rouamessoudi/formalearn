@@ -1,0 +1,17 @@
+<header class="nav">
+  <a routerLink="/app/catalogue" class="brand">
+    <span class="mark">FL</span>
+    FormaLearn
+  </a>
+  <nav>
+    <a routerLink="/app/catalogue" routerLinkActive="active">Catalogue</a>
+    <a routerLink="/app/inscriptions" routerLinkActive="active">Mes inscriptions</a>
+    <a routerLink="/app/recommandations" routerLinkActive="active">Recommandations</a>
+    <a routerLink="/app/profil" routerLinkActive="active">Profil</a>
+  </nav>
+  <span class="ghost">{{ auth.currentUser()?.fullName }} · APPRENANT</span>
+  <button class="ghost logout" type="button" (click)="auth.logout()">Déconnexion</button>
+</header>
+<main>
+  <router-outlet />
+</main>

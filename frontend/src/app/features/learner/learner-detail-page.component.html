@@ -1,0 +1,68 @@
+<section class="fl-page">
+  <a class="back" routerLink="/app/catalogue">← Catalogue</a>
+
+  @if (loading) {
+    <article class="fl-card"><div class="skeleton"></div><div class="skeleton"></div></article>
+  } @else if (formation) {
+    <div class="fl-hero">
+      <div class="meta">
+        <span class="fl-badge">{{ formation.category.name }}</span>
+        <span class="fl-badge published">{{ formation.status }}</span>
+      </div>
+      <h1>{{ formation.title }}</h1>
+      <p>{{ formation.description }}</p>
+      <p>{{ formation.price | priceDt }} · {{ formation.durationHours }} h · {{ formation.chapterCount ?? chapters.length }} chapitres</p>
+    </div>
+
+    <article class="fl-card body">
+      <h2>Présentation</h2>
+      <p>{{ formation.description }}</p>
+    </article>
+
+    <h2>Programme de la formation</h2>
+    @if (chapters.length === 0) {
+      <article class="fl-card empty">Le programme sera bientôt disponible.</article>
+    } @else {
+      <ol class="program">
+        @for (chapter of chapters; track chapter.id) {
+          <li class="fl-card">
+            <strong>{{ chapter.position }}. {{ chapter.title }}</strong>
+            @if (chapter.content) {
+              <p>{{ chapter.content }}</p>
+            }
+          </li>
+        }
+      </ol>
+    }
+
+    <h2>Sessions disponibles</h2>
+    @if (sessions.length === 0) {
+      <article class="fl-card empty">Aucune session n'est planifiée pour le moment.</article>
+    } @else {
+      <div class="sessions">
+        @for (session of sessions; track session.id) {
+          <article class="fl-card session">
+            <div class="session-top">
+              <strong>{{ formatDate(session.startDate) }} → {{ formatDate(session.endDate) }}</strong>
+              <span class="fl-badge" [class.open]="session.status === 'OPEN'" [class.closed]="session.status === 'CLOSED'">{{ session.status }}</span>
+              <span class="fl-badge" [class]="fillKind(session)">{{ fillLabel(session) }}</span>
+            </div>
+            <p>Capacité : {{ session.capacity }} · Inscrits : {{ session.enrolledCount }} · Places restantes : {{ session.remainingPlaces }}</p>
+            <div class="fl-progress" [class]="fillKind(session)"><span [style.width.%]="percent(session)"></span></div>
+            <p class="muted">{{ session.enrolledCount }} / {{ session.capacity }} places occupées</p>
+            @if (enrollReason(session)) {
+              <p class="why" [class.warn]="alreadyEnrolled(session)" [class.bad]="!canEnroll(session)">{{ enrollReason(session) }}</p>
+            }
+            <button
+              class="fl-btn fl-btn-primary"
+              type="button"
+              [disabled]="!canEnroll(session) || enrollingId === session.id"
+              (click)="enroll(session)">
+              {{ enrollingId === session.id ? 'Inscription…' : enrollLabel(session) }}
+            </button>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

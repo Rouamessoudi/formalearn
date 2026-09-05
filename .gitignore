@@ -1,0 +1,55 @@
+# OS / IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.p12
+*.jks
+*.key
+credentials.json
+k8s/secrets.local.yaml
+**/application-local.yml
+*.kubeconfig
+
+# Backend
+backend/target/
+backend/.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/.idea/
+
+# Python / ML
+ml/.venv/
+ml/.venv-ci/
+ml/__pycache__/
+ml/**/__pycache__/
+ml/.pytest_cache/
+ml/.python-libs/
+*.pyc
+.Python
+
+# Jenkins local
+jenkins_home/
+jenkins/jenkins-cli.jar
+.venv-ci/
+
+# Build leftovers
+*.class
+*.log
+.scannerwork/
+**/coverage/
+backend/coverage/
+frontend/coverage/
+
+# Local kube / kind
+.kube/

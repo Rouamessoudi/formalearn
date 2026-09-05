@@ -1,0 +1,78 @@
+<section class="fl-page">
+  <div class="fl-hero">
+    <h1>Catalogue des formations</h1>
+  </div>
+
+  <form class="fl-filters fl-card" (ngSubmit)="search()">
+    <label>Recherche
+      <input [(ngModel)]="query.q" name="q" placeholder="🔎 Rechercher une formation..." (ngModelChange)="onFilterChange()">
+    </label>
+    <label>Catégorie
+      <select [(ngModel)]="query.categoryId" name="categoryId" (ngModelChange)="onFilterChange()">
+        <option value="">Toutes</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+    <label>Prix min
+      <input type="number" [(ngModel)]="query.minPrice" name="minPrice" (ngModelChange)="onFilterChange()">
+    </label>
+    <label>Prix max
+      <input type="number" [(ngModel)]="query.maxPrice" name="maxPrice" (ngModelChange)="onFilterChange()">
+    </label>
+    <label>Durée min (h)
+      <input type="number" [(ngModel)]="minDuration" name="minDuration" (ngModelChange)="applyLocal()">
+    </label>
+    <label>Durée max (h)
+      <input type="number" [(ngModel)]="maxDuration" name="maxDuration" (ngModelChange)="applyLocal()">
+    </label>
+    <label>Tri
+      <select [(ngModel)]="sort" name="sort" (ngModelChange)="applyLocal()">
+        <option value="date">Date</option>
+        <option value="price">Prix</option>
+        <option value="duration">Durée</option>
+      </select>
+    </label>
+    <button class="fl-btn fl-btn-primary" type="submit">Rechercher</button>
+    <button class="ghost" type="button" (click)="reset()">Réinitialiser les filtres</button>
+  </form>
+
+  @if (loading) {
+    <div class="fl-grid">
+      <article class="course-card"><div class="skeleton"></div><div class="skeleton"></div></article>
+      <article class="course-card"><div class="skeleton"></div><div class="skeleton"></div></article>
+      <article class="course-card"><div class="skeleton"></div><div class="skeleton"></div></article>
+    </div>
+  } @else if (error) {
+    <article class="fl-card empty">
+      <h2>❌ Catalogue indisponible</h2>
+      <p>{{ error }}</p>
+    </article>
+  } @else if (displayed.length === 0) {
+    <article class="fl-card empty">
+      <h2>Aucune formation trouvée</h2>
+      <p>Élargissez la recherche ou réinitialisez les filtres.</p>
+    </article>
+  } @else {
+    <p class="muted">{{ displayed.length }} formation(s) trouvée(s)</p>
+    <div class="fl-grid">
+      @for (item of displayed; track item.id) {
+        <article class="course-card">
+          <div class="meta">
+            <span class="fl-badge">{{ item.category.name }}</span>
+            <span class="fl-badge published">{{ item.status }}</span>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ snippet(item.description) }}</p>
+          <div class="meta">
+            <span>{{ item.price | priceDt }}</span>
+            <span>{{ item.durationHours }} h</span>
+            <span>{{ item.chapterCount ?? 0 }} chapitres</span>
+          </div>
+          <a class="fl-btn fl-btn-primary" [routerLink]="['/app/catalogue', item.id]">Voir la formation</a>
+        </article>
+      }
+    </div>
+  }
+</section>

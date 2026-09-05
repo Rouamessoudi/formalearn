@@ -1,0 +1,53 @@
+<section class="fl-page">
+  <div class="fl-toolbar">
+    <div>
+      <h1>Catégories</h1>
+    </div>
+    <button class="fl-btn fl-btn-primary" type="button" (click)="openCreate()">+ Nouvelle catégorie</button>
+  </div>
+
+  <label>Recherche
+    <input [(ngModel)]="q" name="q" (ngModelChange)="apply()" placeholder="Nom de catégorie">
+  </label>
+
+  @if (loading) {
+    <p class="muted">Chargement…</p>
+  } @else if (displayed.length === 0) {
+    <article class="fl-card empty">Aucune catégorie.</article>
+  } @else {
+    <div class="fl-table-wrap fl-card" style="margin-top:1rem">
+      <table>
+        <thead>
+          <tr><th>Nom</th><th>Description</th><th>Formations</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (category of displayed; track category.id) {
+            <tr>
+              <td><strong>{{ category.name }}</strong></td>
+              <td>{{ category.description || '—' }}</td>
+              <td>{{ category.formationCount ?? 0 }}</td>
+              <td class="fl-actions">
+                <button class="link" type="button" (click)="openEdit(category)">Modifier</button>
+                <button class="link danger" type="button" (click)="remove(category)">Supprimer</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (modalOpen) {
+  <div class="overlay" (click)="modalOpen = false">
+    <form class="modal" [formGroup]="form" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+      <h2>{{ editing ? 'Modifier' : 'Nouvelle' }} catégorie</h2>
+      <label>Nom<input formControlName="name" placeholder="Ex. Soft Skills, Mobile…"></label>
+      <label>Description<textarea formControlName="description" rows="3"></textarea></label>
+      <div class="modal-actions">
+        <button class="ghost" type="button" (click)="modalOpen = false">Annuler</button>
+        <button class="fl-btn fl-btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+}
