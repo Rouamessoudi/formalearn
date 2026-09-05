@@ -15,6 +15,7 @@ pipeline {
 
   environment {
     CI = 'true'
+    SONAR_HOST_URL = 'http://host.docker.internal:9000'
   }
 
   stages {
@@ -68,17 +69,25 @@ pipeline {
 
     stage('Backend Tests') {
       steps {
-        withCredentials([
-          string(credentialsId: 'formalearn-demo-admin', variable: 'DEMO_ADMIN_PASSWORD'),
-          string(credentialsId: 'formalearn-demo-learner', variable: 'DEMO_LEARNER_PASSWORD')
-        ]) {
-          dir('backend') {
-            script {
+        script {
+          def runMavenTests = {
+            dir('backend') {
               if (isUnix()) {
                 sh './mvnw -B test'
               } else {
                 bat 'mvnw.cmd -B test'
               }
+            }
+          }
+          if (env.DEMO_ADMIN_PASSWORD?.trim() && env.DEMO_LEARNER_PASSWORD?.trim()) {
+            echo 'Mots de passe démo fournis par l’environnement de l’agent Jenkins.'
+            runMavenTests()
+          } else {
+            withCredentials([
+              string(credentialsId: 'formalearn-demo-admin', variable: 'DEMO_ADMIN_PASSWORD'),
+              string(credentialsId: 'formalearn-demo-learner', variable: 'DEMO_LEARNER_PASSWORD')
+            ]) {
+              runMavenTests()
             }
           }
         }
@@ -187,9 +196,9 @@ pipeline {
           dir('backend') {
             script {
               if (isUnix()) {
-                sh './mvnw -B -DskipTests sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN'
+                sh './mvnw -B -DskipTests sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN -Dsonar.qualitygate.wait=true'
               } else {
-                bat 'mvnw.cmd -B -DskipTests sonar:sonar -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.token=%SONAR_TOKEN%'
+                bat 'mvnw.cmd -B -DskipTests sonar:sonar -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.token=%SONAR_TOKEN% -Dsonar.qualitygate.wait=true'
               }
             }
           }
