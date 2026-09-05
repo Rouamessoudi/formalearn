@@ -1,3 +1,4 @@
+sonar
 workflow-aggregator:latest
 git:latest
 credentials-binding:latest

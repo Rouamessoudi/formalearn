@@ -1,0 +1,59 @@
+# Stack DevOps (optionnelle). L’app LMS reste docker-compose.yml (port 8088).
+# Usage :
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+#
+# Ports : Prometheus 9091, Grafana 3000 (admin/admin), SonarQube 9000.
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: formalearn-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - formalearn
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: formalearn-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - formalearn
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: formalearn-sonarqube
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_ext:/opt/sonarqube/extensions
+    networks:
+      - formalearn
+
+volumes:
+  grafana_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_ext:

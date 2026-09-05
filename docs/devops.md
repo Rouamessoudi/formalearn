@@ -1,5 +1,9 @@
 # DevOps — FormaLearn (Phase 6)
 
+Le dépôt central est **GitHub** : https://github.com/Rouamessoudi/formalearn  
+
+Guide opérationnel complet (webhook, Sonar, Grafana, K8s) : **`README_DEVOPS.md`**.
+
 ## 1. CI/CD
 
 Monorepo : `backend/` (Spring), `frontend/` (Angular), `ml/` (Python).  

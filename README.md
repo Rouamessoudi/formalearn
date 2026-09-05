@@ -2,6 +2,9 @@
 
 FormaLearn est une application LMS académique : un **administrateur** pilote le catalogue et les sessions, un **apprenant** consulte l’offre, s’inscrit et reçoit des **recommandations** (MLA).
 
+**GitHub :** https://github.com/Rouamessoudi/formalearn  
+**DevOps (Jenkins, Sonar, K8s, Prometheus, Grafana) :** voir `README_DEVOPS.md`.
+
 ## 1. Présentation
 
 Monorepo Angular + Spring Boot + MySQL + FastAPI (scikit-learn) + Jenkins + Docker.

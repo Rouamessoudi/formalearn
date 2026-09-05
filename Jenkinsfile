@@ -6,9 +6,11 @@ pipeline {
   }
 
   parameters {
-    booleanParam(name: 'SKIP_SONAR', defaultValue: true, description: 'Laisser true tant qu’aucun SonarQube n’est configuré (recommandé).')
-    booleanParam(name: 'RUN_FRONTEND_TESTS', defaultValue: true, description: 'Exécuter Karma/ChromeHeadless. Nécessite Chrome ou Chromium sur l’agent.')
-    booleanParam(name: 'FORCE_FAIL', defaultValue: false, description: 'Démo soutenance : force un FAILURE après les tests pour montrer que la CI bloque.')
+    booleanParam(name: 'SKIP_SONAR', defaultValue: false, description: 'true uniquement si SonarQube n’est pas encore joignable. Défaut : analyse + Quality Gate obligatoires.')
+    booleanParam(name: 'RUN_FRONTEND_TESTS', defaultValue: true, description: 'Karma/ChromeHeadless.')
+    booleanParam(name: 'PUSH_IMAGES', defaultValue: false, description: 'Pousser les images si DOCKER_REGISTRY est défini (credentials docker-registry).')
+    booleanParam(name: 'DEPLOY_K8S', defaultValue: false, description: 'kubectl apply -k k8s/ seulement si un cluster sain est configuré sur l’agent.')
+    booleanParam(name: 'FORCE_FAIL', defaultValue: false, description: 'Échec volontaire après les tests (démo).')
   }
 
   environment {
@@ -180,9 +182,9 @@ pipeline {
           dir('backend') {
             script {
               if (isUnix()) {
-                sh './mvnw -B -DskipTests sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                sh './mvnw -B -DskipTests sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN'
               } else {
-                bat 'mvnw.cmd -B -DskipTests sonar:sonar -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.login=%SONAR_TOKEN%'
+                bat 'mvnw.cmd -B -DskipTests sonar:sonar -Dsonar.host.url=%SONAR_HOST_URL% -Dsonar.token=%SONAR_TOKEN%'
               }
             }
           }
@@ -190,12 +192,14 @@ pipeline {
       }
     }
 
-    stage('SonarQube (skipped)') {
+    stage('Quality Gate') {
       when {
-        expression { return params.SKIP_SONAR }
+        expression { return !params.SKIP_SONAR }
       }
       steps {
-        echo 'SonarQube ignoré (SKIP_SONAR=true). Aucun token n’est lu. Activez le stage quand un serveur Sonar existe et que le credential Jenkins "sonar-token" est créé.'
+        timeout(time: 10, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
       }
     }
 
@@ -238,6 +242,55 @@ pipeline {
               docker build -t formalearn-frontend:%BUILD_NUMBER% ./frontend
               docker build -t formalearn-ml:%BUILD_NUMBER% ./ml
             '''
+          }
+        }
+      }
+    }
+
+    stage('Docker Push') {
+      when {
+        expression { return params.PUSH_IMAGES }
+      }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'docker-registry', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
+          script {
+            if (!env.DOCKER_REGISTRY?.trim()) {
+              error('PUSH_IMAGES=true mais DOCKER_REGISTRY n’est pas défini sur Jenkins.')
+            }
+            if (isUnix()) {
+              sh '''
+                set -e
+                echo "$REG_PASS" | docker login "$DOCKER_REGISTRY" -u "$REG_USER" --password-stdin
+                docker tag formalearn-backend:${BUILD_NUMBER} ${DOCKER_REGISTRY}/formalearn-backend:${BUILD_NUMBER}
+                docker tag formalearn-frontend:${BUILD_NUMBER} ${DOCKER_REGISTRY}/formalearn-frontend:${BUILD_NUMBER}
+                docker tag formalearn-ml:${BUILD_NUMBER} ${DOCKER_REGISTRY}/formalearn-ml:${BUILD_NUMBER}
+                docker push ${DOCKER_REGISTRY}/formalearn-backend:${BUILD_NUMBER}
+                docker push ${DOCKER_REGISTRY}/formalearn-frontend:${BUILD_NUMBER}
+                docker push ${DOCKER_REGISTRY}/formalearn-ml:${BUILD_NUMBER}
+              '''
+            } else {
+              bat 'echo Docker push Windows : définir DOCKER_REGISTRY et credential docker-registry'
+            }
+          }
+        }
+      }
+    }
+
+    stage('Kubernetes') {
+      when {
+        expression { return params.DEPLOY_K8S }
+      }
+      steps {
+        script {
+          if (isUnix()) {
+            sh '''
+              set -e
+              kubectl cluster-info
+              kubectl apply -k k8s/
+              kubectl -n formalearn rollout status deploy/backend --timeout=180s
+            '''
+          } else {
+            bat 'kubectl apply -k k8s/'
           }
         }
       }
